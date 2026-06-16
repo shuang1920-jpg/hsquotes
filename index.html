@@ -1,725 +1,709 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.2">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>灵光 · 金句匣</title>
+    <!-- 引入腾讯云开发 Web SDK -->
+    <script src="https://imgcache.qq.com/qcloud/cloudbase-js-sdk/1.7.2/cloudbase.full.js"></script>
+    <style>
+        /* ===== 全局重置 & 字体 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0b0d15;
+            padding: 16px;
+            background: radial-gradient(circle at 20% 20%, rgba(74, 0, 224, 0.4) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(0, 200, 255, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 60%, rgba(255, 215, 0, 0.15) 0%, transparent 40%),
+                        #0b0d15;
+        }
+
+        /* ===== 主容器 (毛玻璃) ===== */
+        .glass-container {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(20, 25, 45, 0.65);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 42px;
+            padding: 28px 20px 32px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 70% 10%, rgba(100, 150, 255, 0.1), transparent 60%);
+            pointer-events: none;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 28px;
+            position: relative;
+            z-index: 2;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .header .count-badge {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+            padding: 6px 14px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .input-area {
+            position: relative;
+            z-index: 2;
+            margin-bottom: 24px;
+        }
+        .input-area textarea {
+            width: 100%;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 16px 18px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #f1f5f9;
+            resize: none;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .input-area textarea:focus {
+            border-color: #818cf8;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+        .input-area textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+        .input-row input[type="date"] {
+            flex: 1;
+            min-width: 140px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 40px;
+            padding: 12px 18px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #cbd5e1;
+            outline: none;
+            transition: 0.2s;
+        }
+        .input-row input[type="date"]:focus {
+            border-color: #34d399;
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
+        }
+        .input-row input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.8) brightness(0.9);
+            cursor: pointer;
+        }
+
+        .btn-save {
+            flex: 1;
+            min-width: 80px;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            border: none;
+            border-radius: 40px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-save:active {
+            transform: scale(0.94);
+        }
+        .btn-save:disabled {
+            opacity: 0.5;
+            transform: none;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 28px 0 12px 4px;
+            position: relative;
+            z-index: 2;
+        }
+        .list-header span {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .entries-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 460px;
+            overflow-y: auto;
+            padding-right: 4px;
+            position: relative;
+            z-index: 2;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.1) transparent;
+        }
+        .entries-list::-webkit-scrollbar {
+            width: 3px;
+        }
+        .entries-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+
+        .entry-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 16px 18px;
+            transition: all 0.25s ease;
+            animation: fadeSlideUp 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+        }
+        @keyframes fadeSlideUp {
+            0% { opacity: 0; transform: translateY(18px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .entry-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e2e8f0;
+            word-break: break-word;
+            margin-bottom: 10px;
+            font-weight: 400;
+        }
+        .entry-text::before {
+            content: '“';
+            color: rgba(167, 139, 250, 0.4);
+            font-size: 18px;
+            font-weight: 700;
+            margin-right: 4px;
+        }
+        .entry-text::after {
+            content: '”';
+            color: rgba(167, 139, 250, 0.4);
+            font-size: 18px;
+            font-weight: 700;
+            margin-left: 4px;
+        }
+
+        .entry-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .entry-date {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .entry-date::before {
+            content: '📅';
+            font-size: 12px;
+            opacity: 0.5;
+        }
+        .entry-delete {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 12px;
+            transition: 0.2s;
+            line-height: 1;
+        }
+        .entry-delete:active {
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.15);
+        }
+        .entry-delete.is-mine {
+            color: rgba(255, 100, 100, 0.5);
+        }
+        .entry-delete.is-mine:active {
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.2);
+        }
+        .entry-delete.not-mine {
+            opacity: 0.3;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 0 32px;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+        .empty-state span {
+            display: block;
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .loading-tip {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.3);
+            font-size: 14px;
+        }
+
+        /* ===== 密码遮罩 ===== */
+        #password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(8, 10, 20, 0.92);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            flex-direction: column;
+            padding: 30px;
+            transition: opacity 0.5s ease;
+        }
+        #password-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .lock-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 48px;
+            padding: 40px 28px 36px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+        }
+        .lock-box .lock-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .lock-box h2 {
+            color: #f1f5f9;
+            font-weight: 600;
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+        .lock-box p {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+        .lock-box input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 60px;
+            padding: 16px 20px;
+            font-size: 18px;
+            color: #fff;
+            text-align: center;
+            letter-spacing: 4px;
+            outline: none;
+            transition: 0.25s;
+        }
+        .lock-box input:focus {
+            border-color: #818cf8;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+        .lock-box input::placeholder {
+            letter-spacing: 0px;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 16px;
+        }
+        .lock-box .error-msg {
+            color: #f87171;
+            font-size: 14px;
+            margin-top: 14px;
+            height: 20px;
+            transition: 0.2s;
+        }
+        .lock-box .btn-unlock {
+            width: 100%;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            border: none;
+            border-radius: 60px;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
+        }
+        .lock-box .btn-unlock:active {
+            transform: scale(0.96);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+        .mt-1 { margin-top: 4px; }
+    </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="zh-CN"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;灵光 · 金句匣&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 引入腾讯云开发 Web SDK --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://imgcache.qq.com/qcloud/cloudbase-js-sdk/1.7.2/cloudbase.full.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* ===== 全局重置 &amp; 字体 ===== */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>* {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-sizing: border-box;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-family: -apple-system, "Helvetica Neue", "Segoe UI", system-ui, sans-serif;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>min-height: 100vh;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #0b0d15;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: radial-gradient(circle at 20% 20%, rgba(74, 0, 224, 0.4) 0%, transparent 50%),</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>radial-gradient(circle at 80% 80%, rgba(0, 200, 255, 0.3) 0%, transparent 50%),</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>radial-gradient(circle at 40% 60%, rgba(255, 215, 0, 0.15) 0%, transparent 40%),</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>#0b0d15;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* ===== 主容器 (毛玻璃) ===== */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.glass-container {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 420px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(20, 25, 45, 0.65);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>backdrop-filter: blur(20px) saturate(180%);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>-webkit-backdrop-filter: blur(20px) saturate(180%);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 42px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 28px 20px 32px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(255, 255, 255, 0.06);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s ease;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.glass-container::before {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>content: '';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>top: -50%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>left: -50%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 200%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 200%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: radial-gradient(circle at 70% 10%, rgba(100, 150, 255, 0.1), transparent 60%);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.header {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: space-between;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: baseline;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 28px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>z-index: 2;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.header h1 {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 700;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>-webkit-background-clip: text;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-clip: text;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: transparent;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>letter-spacing: -0.5px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.header .count-badge {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 13px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(255, 255, 255, 0.5);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.08);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 6px 14px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 40px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(255, 255, 255, 0.05);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.input-area {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>z-index: 2;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.input-area textarea {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 100px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.06);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(255, 255, 255, 0.1);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 16px 18px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>line-height: 1.6;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #f1f5f9;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>resize: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>outline: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.25s ease;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.input-area textarea:focus {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-color: #818cf8;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.08);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.input-area textarea::placeholder {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(255, 255, 255, 0.3);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.input-row {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex-wrap: wrap;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.input-row input[type="date"] {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex: 1;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>min-width: 140px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.06);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(255, 255, 255, 0.08);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 40px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px 18px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 500;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #cbd5e1;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>outline: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: 0.2s;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.input-row input[type="date"]:focus {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-color: #34d399;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.input-row input[type="date"]::-webkit-calendar-picker-indicator {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>filter: invert(0.8) brightness(0.9);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-save {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex: 1;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>min-width: 80px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #7c3aed, #4f46e5);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 40px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #fff;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 6px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-save:active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: scale(0.94);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-save:disabled {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0.5;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.list-header {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: space-between;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 28px 0 12px 4px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>z-index: 2;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.list-header span {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(255, 255, 255, 0.4);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 13px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>letter-spacing: 1px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-transform: uppercase;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entries-list {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex-direction: column;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-height: 460px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>overflow-y: auto;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding-right: 4px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>z-index: 2;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>scrollbar-width: thin;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>scrollbar-color: rgba(255,255,255,0.1) transparent;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entries-list::-webkit-scrollbar {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 3px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entries-list::-webkit-scrollbar-thumb {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.15);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-card {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.04);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>backdrop-filter: blur(4px);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(255, 255, 255, 0.06);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 16px 18px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.25s ease;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>animation: fadeSlideUp 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>@keyframes fadeSlideUp {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>0% { opacity: 0; transform: translateY(18px); }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>100% { opacity: 1; transform: translateY(0); }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-text {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>line-height: 1.6;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #e2e8f0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>word-break: break-word;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 400;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-text::before {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>content: '“';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(167, 139, 250, 0.4);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 18px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 700;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-right: 4px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-text::after {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>content: '”';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(167, 139, 250, 0.4);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 18px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 700;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-left: 4px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-footer {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: space-between;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-date {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 13px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(255, 255, 255, 0.3);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 500;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 6px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-date::before {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>content: '📅';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0.5;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-delete {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(255, 255, 255, 0.15);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 18px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 4px 8px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: 0.2s;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>line-height: 1;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-delete:active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #f87171;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(239, 68, 68, 0.15);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-delete.is-mine {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(255, 100, 100, 0.5);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-delete.is-mine:active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #f87171;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(239, 68, 68, 0.2);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.entry-delete.not-mine {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0.3;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: default;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.empty-state {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 48px 0 32px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(255, 255, 255, 0.15);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>letter-spacing: 0.5px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.empty-state span {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 40px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0.5;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.loading-tip {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(255,255,255,0.3);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* ===== 密码遮罩 ===== */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>#password-overlay {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: fixed;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>top: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>left: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(8, 10, 20, 0.92);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>backdrop-filter: blur(30px);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>-webkit-backdrop-filter: blur(30px);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>z-index: 999;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex-direction: column;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 30px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: opacity 0.5s ease;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>#password-overlay.hidden {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.lock-box {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.04);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(255, 255, 255, 0.08);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 48px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 40px 28px 36px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 360px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>backdrop-filter: blur(10px);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.lock-box .lock-icon {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 48px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.lock-box h2 {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #f1f5f9;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 22px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 6px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.lock-box p {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(255, 255, 255, 0.3);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 28px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.lock-box input {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.06);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(255, 255, 255, 0.1);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 60px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 16px 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 18px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #fff;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>letter-spacing: 4px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>outline: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: 0.25s;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.lock-box input:focus {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-color: #818cf8;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.08);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.lock-box input::placeholder {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>letter-spacing: 0px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(255, 255, 255, 0.2);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.lock-box .error-msg {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #f87171;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: 0.2s;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.lock-box .btn-unlock {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #7c3aed, #4f46e5);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 60px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 18px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #fff;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: 0.2s;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.lock-box .btn-unlock:active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: scale(0.96);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.hidden {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: none !important;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.mt-1 { margin-top: 4px; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- ===== 密码遮罩 ===== --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="password-overlay"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="lock-box"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;span class="lock-icon"&gt;✨&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2&gt;灵光 · 金句匣&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;p&gt;输入密码，开启灵感&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="password" id="password-input" placeholder="请输入访问密码" autocomplete="off"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="error-msg" id="password-error"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="btn-unlock" id="unlock-btn"&gt;解 锁&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- ===== 主应用 ===== --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="glass-container" id="app-container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="header"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;h1&gt;✦ 灵光匣&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;span class="count-badge" id="entry-count"&gt;0 条&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="input-area"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;textarea id="idea-input" placeholder="此刻的奇思妙想，或是打动你的金句…"&gt;&lt;/textarea&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="input-row"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;input type="date" id="date-input"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="btn-save" id="save-btn"&gt;✦ 存入&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.2);text-align:right;" id="user-status"&gt;未连接&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="list-header"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;span&gt;📖 灵感集&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="entries-list" id="entries-list"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="loading-tip"&gt;⏳ 加载中...&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>(function() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// ============================================================</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 1. 密码校验</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// ============================================================</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const CORRECT_PASSWORD = 'bravohs666';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const overlay = document.getElementById('password-overlay');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const passwordInput = document.getElementById('password-input');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const unlockBtn = document.getElementById('unlock-btn');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const errorMsg = document.getElementById('password-error');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>function unlockApp() {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>overlay.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>sessionStorage.setItem('isUnlocked', 'true');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>// 解锁后初始化云开发</p>
-<p class="p1"><span class="Apple-converted-space">                </span>initCloudBase();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>function handleUnlock() {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const pwd = passwordInput.value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (pwd === CORRECT_PASSWORD) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>errorMsg.textContent = '';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>unlockApp();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>errorMsg.textContent = '❌ 密码错误，请重试';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>passwordInput.value = '';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>passwordInput.focus();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>unlockBtn.addEventListener('click', handleUnlock);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>passwordInput.addEventListener('keydown', (e) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (e.key === 'Enter') {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>e.preventDefault();</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>handleUnlock();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (sessionStorage.getItem('isUnlocked') === 'true') {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>overlay.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>// 但此时云开发尚未初始化，需要等页面加载完成后调用</p>
-<p class="p1"><span class="Apple-converted-space">                </span>// 我们会在页面加载完成后检查并初始化</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>overlay.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>passwordInput.focus();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// ============================================================</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 2. 腾讯云开发核心逻辑</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// ============================================================</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const ENV_ID = 'hsquotes-d0goazq5j27ffa856';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const COLLECTION_NAME = 'ideas';</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>let app = null;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>let db = null;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>let currentUser = null; // 存储当前匿名用户的 openid</p>
-<p class="p1"><span class="Apple-converted-space">            </span>let isCloudReady = false;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// DOM 元素</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const ideaInput = document.getElementById('idea-input');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const dateInput = document.getElementById('date-input');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const saveBtn = document.getElementById('save-btn');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const entriesList = document.getElementById('entries-list');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const countBadge = document.getElementById('entry-count');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const userStatus = document.getElementById('user-status');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 辅助：日期默认今天</p>
-<p class="p1"><span class="Apple-converted-space">            </span>function setDefaultDate() {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const today = new Date();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const y = today.getFullYear();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const m = String(today.getMonth() + 1).padStart(2, '0');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const d = String(today.getDate()).padStart(2, '0');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>dateInput.value = `${y}-${m}-${d}`;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>setDefaultDate();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 初始化云开发</p>
-<p class="p1"><span class="Apple-converted-space">            </span>function initCloudBase() {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (isCloudReady) return;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>app = cloudbase.init({</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>env: ENV_ID</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>// 匿名登录</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const auth = app.auth({ persistence: 'local' });</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>auth.anonymousAuthProvider().signIn().then(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>// 获取当前用户信息</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>currentUser = auth.currentUser;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>if (currentUser) {</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>// 从 currentUser.uid 获取 openid (腾讯云匿名登录的 uid 就是 openid)</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>const openid = currentUser.uid;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>console.log('匿名登录成功，openid:', openid);</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>userStatus.textContent = '✅ 已连接 (匿名)';</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>db = app.database();</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>isCloudReady = true;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>// 加载数据</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>loadEntries();</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>userStatus.textContent = '❌ 登录失败';</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}).catch(err =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>console.error('匿名登录失败:', err);</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>userStatus.textContent = '❌ 登录失败，请检查网络或控制台匿名登录是否开启';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
-<p class="p1"><span class="Apple-converted-space">                </span>} catch (e) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>console.error('初始化云开发失败:', e);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>userStatus.textContent = '❌ 初始化失败';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 如果页面加载时已经解锁，直接初始化</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (sessionStorage.getItem('isUnlocked') === 'true') {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>// 等DOM完全加载</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (document.readyState === 'complete') {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>initCloudBase();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>window.addEventListener('load', initCloudBase);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>// 未解锁，等待解锁按钮触发</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// ============================================================</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 3. 数据库操作</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// ============================================================</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 加载所有灵感（按日期降序）</p>
-<p class="p1"><span class="Apple-converted-space">            </span>function loadEntries() {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!db) return;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const collection = db.collection(COLLECTION_NAME);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>// 按 date 降序，然后按 _id 降序（保证最新在前）</p>
-<p class="p1"><span class="Apple-converted-space">                </span>collection.orderBy('date', 'desc').orderBy('_id', 'desc').get().then(res =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const data = res.data || [];</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>renderEntries(data);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}).catch(err =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>console.error('查询失败:', err);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>entriesList.innerHTML = `&lt;div class="empty-state"&gt;&lt;span&gt;⚠️&lt;/span&gt;加载失败，请重试&lt;/div&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 渲染列表</p>
-<p class="p1"><span class="Apple-converted-space">            </span>function renderEntries(entries) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>countBadge.textContent = `${entries.length} 条`;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (entries.length === 0) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>entriesList.innerHTML = `</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="empty-state"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;span&gt;🪐&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>还没有灵感，写一条吧</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>`;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>let html = '';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>entries.forEach(entry =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const parts = entry.date.split('-');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const displayDate = `${parts[0]}年${parts[1]}月${parts[2]}日`;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const safeText = entry.text.replace(/&lt;/g, '&amp;lt;').replace(/&gt;/g, '&amp;gt;');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>// 判断是否本人（通过 _openid 对比）</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const isMine = (entry._openid === currentUser?.uid);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const deleteClass = isMine ? 'is-mine' : 'not-mine';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const deleteTitle = isMine ? '删除' : '仅可删除自己的';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>html += `</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="entry-card" data-id="${entry._id}"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div class="entry-text"&gt;${safeText}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div class="entry-footer"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span class="entry-date"&gt;${displayDate}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>&lt;button class="entry-delete ${deleteClass}" data-id="${entry._id}" title="${deleteTitle}" ${isMine ? '' : 'disabled'}&gt;✕&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>entriesList.innerHTML = html;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>// 绑定删除事件（仅本人可删）</p>
-<p class="p1"><span class="Apple-converted-space">                </span>entriesList.querySelectorAll('.entry-delete.is-mine').forEach(btn =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>btn.addEventListener('click', function(e) {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>e.stopPropagation();</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>const id = this.getAttribute('data-id');</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>if (confirm('确定要删除这条灵感吗？')) {</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>deleteEntryById(id);</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 添加新灵感</p>
-<p class="p1"><span class="Apple-converted-space">            </span>function addEntry() {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!isCloudReady) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alert('云服务未就绪，请稍后');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const text = ideaInput.value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const date = dateInput.value;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!text) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>ideaInput.style.borderColor = '#f87171';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>setTimeout(() =&gt; ideaInput.style.borderColor = '', 600);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!date) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alert('请选择日期');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>saveBtn.disabled = true;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>saveBtn.textContent = '⏳ 存入中';</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>const collection = db.collection(COLLECTION_NAME);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>collection.add({</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>text: text,</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>date: date,</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>// 系统会自动添加 _openid 字段（当前用户的匿名ID）</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}).then(res =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>// 成功</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>ideaInput.value = '';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>setDefaultDate();</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>loadEntries(); // 刷新列表</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}).catch(err =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>console.error('添加失败:', err);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alert('添加失败，请重试');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}).finally(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>saveBtn.disabled = false;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>saveBtn.innerHTML = '✦ 存入';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 删除单条（仅本人可删，但后端已校验，此处前端只允许自己的按钮）</p>
-<p class="p1"><span class="Apple-converted-space">            </span>function deleteEntryById(id) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!db) return;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const collection = db.collection(COLLECTION_NAME);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>// 注意：权限为“读取全部，修改本人”，所以只有 _openid 匹配的文档才能被删除</p>
-<p class="p1"><span class="Apple-converted-space">                </span>collection.doc(id).remove().then(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>loadEntries();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}).catch(err =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>console.error('删除失败:', err);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alert('删除失败，可能您没有权限');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// ============================================================</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 4. 绑定UI事件</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// ============================================================</p>
-<p class="p1"><span class="Apple-converted-space">            </span>saveBtn.addEventListener('click', addEntry);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ideaInput.addEventListener('keydown', (e) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if ((e.ctrlKey || e.metaKey) &amp;&amp; e.key === 'Enter') {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>e.preventDefault();</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>addEntry();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 如果云开发已经准备就绪，也可以手动刷新</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 暴露 reload 到控制台方便调试</p>
-<p class="p1"><span class="Apple-converted-space">            </span>window.reloadEntries = loadEntries;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>})();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+    <!-- ===== 密码遮罩 ===== -->
+    <div id="password-overlay">
+        <div class="lock-box">
+            <span class="lock-icon">✨</span>
+            <h2>灵光 · 金句匣</h2>
+            <p>输入密码，开启灵感</p>
+            <input type="password" id="password-input" placeholder="请输入访问密码" autocomplete="off">
+            <div class="error-msg" id="password-error"></div>
+            <button class="btn-unlock" id="unlock-btn">解 锁</button>
+        </div>
+    </div>
+
+    <!-- ===== 主应用 ===== -->
+    <div class="glass-container" id="app-container">
+        <div class="header">
+            <h1>✦ 灵光匣</h1>
+            <span class="count-badge" id="entry-count">0 条</span>
+        </div>
+
+        <div class="input-area">
+            <textarea id="idea-input" placeholder="此刻的奇思妙想，或是打动你的金句…"></textarea>
+            <div class="input-row">
+                <input type="date" id="date-input">
+                <button class="btn-save" id="save-btn">✦ 存入</button>
+            </div>
+            <div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.2);text-align:right;" id="user-status">未连接</div>
+        </div>
+
+        <div class="list-header">
+            <span>📖 灵感集</span>
+        </div>
+
+        <div class="entries-list" id="entries-list">
+            <div class="loading-tip">⏳ 加载中...</div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ============================================================
+            // 1. 密码校验
+            // ============================================================
+            const CORRECT_PASSWORD = 'bravohs666';
+            const overlay = document.getElementById('password-overlay');
+            const passwordInput = document.getElementById('password-input');
+            const unlockBtn = document.getElementById('unlock-btn');
+            const errorMsg = document.getElementById('password-error');
+
+            function unlockApp() {
+                overlay.classList.add('hidden');
+                sessionStorage.setItem('isUnlocked', 'true');
+                // 解锁后初始化云开发
+                initCloudBase();
+            }
+
+            function handleUnlock() {
+                const pwd = passwordInput.value.trim();
+                if (pwd === CORRECT_PASSWORD) {
+                    errorMsg.textContent = '';
+                    unlockApp();
+                } else {
+                    errorMsg.textContent = '❌ 密码错误，请重试';
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            }
+
+            unlockBtn.addEventListener('click', handleUnlock);
+            passwordInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleUnlock();
+                }
+            });
+
+            if (sessionStorage.getItem('isUnlocked') === 'true') {
+                overlay.classList.add('hidden');
+                // 但此时云开发尚未初始化，需要等页面加载完成后调用
+                // 我们会在页面加载完成后检查并初始化
+            } else {
+                overlay.classList.remove('hidden');
+                passwordInput.focus();
+            }
+
+            // ============================================================
+            // 2. 腾讯云开发核心逻辑
+            // ============================================================
+            const ENV_ID = 'hsquotes-d0goazq5j27ffa856';
+            const COLLECTION_NAME = 'ideas';
+
+            let app = null;
+            let db = null;
+            let currentUser = null; // 存储当前匿名用户的 openid
+            let isCloudReady = false;
+
+            // DOM 元素
+            const ideaInput = document.getElementById('idea-input');
+            const dateInput = document.getElementById('date-input');
+            const saveBtn = document.getElementById('save-btn');
+            const entriesList = document.getElementById('entries-list');
+            const countBadge = document.getElementById('entry-count');
+            const userStatus = document.getElementById('user-status');
+
+            // 辅助：日期默认今天
+            function setDefaultDate() {
+                const today = new Date();
+                const y = today.getFullYear();
+                const m = String(today.getMonth() + 1).padStart(2, '0');
+                const d = String(today.getDate()).padStart(2, '0');
+                dateInput.value = `${y}-${m}-${d}`;
+            }
+            setDefaultDate();
+
+            // 初始化云开发
+            function initCloudBase() {
+                if (isCloudReady) return;
+                try {
+                    app = cloudbase.init({
+                        env: ENV_ID
+                    });
+                    // 匿名登录
+                    const auth = app.auth({ persistence: 'local' });
+                    auth.anonymousAuthProvider().signIn().then(() => {
+                        // 获取当前用户信息
+                        currentUser = auth.currentUser;
+                        if (currentUser) {
+                            // 从 currentUser.uid 获取 openid (腾讯云匿名登录的 uid 就是 openid)
+                            const openid = currentUser.uid;
+                            console.log('匿名登录成功，openid:', openid);
+                            userStatus.textContent = '✅ 已连接 (匿名)';
+                            db = app.database();
+                            isCloudReady = true;
+                            // 加载数据
+                            loadEntries();
+                        } else {
+                            userStatus.textContent = '❌ 登录失败';
+                        }
+                    }).catch(err => {
+                        console.error('匿名登录失败:', err);
+                        userStatus.textContent = '❌ 登录失败，请检查网络或控制台匿名登录是否开启';
+                    });
+                } catch (e) {
+                    console.error('初始化云开发失败:', e);
+                    userStatus.textContent = '❌ 初始化失败';
+                }
+            }
+
+            // 如果页面加载时已经解锁，直接初始化
+            if (sessionStorage.getItem('isUnlocked') === 'true') {
+                // 等DOM完全加载
+                if (document.readyState === 'complete') {
+                    initCloudBase();
+                } else {
+                    window.addEventListener('load', initCloudBase);
+                }
+            } else {
+                // 未解锁，等待解锁按钮触发
+            }
+
+            // ============================================================
+            // 3. 数据库操作
+            // ============================================================
+
+            // 加载所有灵感（按日期降序）
+            function loadEntries() {
+                if (!db) return;
+                const collection = db.collection(COLLECTION_NAME);
+                // 按 date 降序，然后按 _id 降序（保证最新在前）
+                collection.orderBy('date', 'desc').orderBy('_id', 'desc').get().then(res => {
+                    const data = res.data || [];
+                    renderEntries(data);
+                }).catch(err => {
+                    console.error('查询失败:', err);
+                    entriesList.innerHTML = `<div class="empty-state"><span>⚠️</span>加载失败，请重试</div>`;
+                });
+            }
+
+            // 渲染列表
+            function renderEntries(entries) {
+                countBadge.textContent = `${entries.length} 条`;
+
+                if (entries.length === 0) {
+                    entriesList.innerHTML = `
+                        <div class="empty-state">
+                            <span>🪐</span>
+                            还没有灵感，写一条吧
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                entries.forEach(entry => {
+                    const parts = entry.date.split('-');
+                    const displayDate = `${parts[0]}年${parts[1]}月${parts[2]}日`;
+                    const safeText = entry.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    // 判断是否本人（通过 _openid 对比）
+                    const isMine = (entry._openid === currentUser?.uid);
+                    const deleteClass = isMine ? 'is-mine' : 'not-mine';
+                    const deleteTitle = isMine ? '删除' : '仅可删除自己的';
+                    html += `
+                        <div class="entry-card" data-id="${entry._id}">
+                            <div class="entry-text">${safeText}</div>
+                            <div class="entry-footer">
+                                <span class="entry-date">${displayDate}</span>
+                                <button class="entry-delete ${deleteClass}" data-id="${entry._id}" title="${deleteTitle}" ${isMine ? '' : 'disabled'}>✕</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                entriesList.innerHTML = html;
+
+                // 绑定删除事件（仅本人可删）
+                entriesList.querySelectorAll('.entry-delete.is-mine').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const id = this.getAttribute('data-id');
+                        if (confirm('确定要删除这条灵感吗？')) {
+                            deleteEntryById(id);
+                        }
+                    });
+                });
+            }
+
+            // 添加新灵感
+            function addEntry() {
+                if (!isCloudReady) {
+                    alert('云服务未就绪，请稍后');
+                    return;
+                }
+                const text = ideaInput.value.trim();
+                const date = dateInput.value;
+                if (!text) {
+                    ideaInput.style.borderColor = '#f87171';
+                    setTimeout(() => ideaInput.style.borderColor = '', 600);
+                    return;
+                }
+                if (!date) {
+                    alert('请选择日期');
+                    return;
+                }
+
+                saveBtn.disabled = true;
+                saveBtn.textContent = '⏳ 存入中';
+
+                const collection = db.collection(COLLECTION_NAME);
+                collection.add({
+                    text: text,
+                    date: date,
+                    // 系统会自动添加 _openid 字段（当前用户的匿名ID）
+                }).then(res => {
+                    // 成功
+                    ideaInput.value = '';
+                    setDefaultDate();
+                    loadEntries(); // 刷新列表
+                }).catch(err => {
+                    console.error('添加失败:', err);
+                    alert('添加失败，请重试');
+                }).finally(() => {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '✦ 存入';
+                });
+            }
+
+            // 删除单条（仅本人可删，但后端已校验，此处前端只允许自己的按钮）
+            function deleteEntryById(id) {
+                if (!db) return;
+                const collection = db.collection(COLLECTION_NAME);
+                // 注意：权限为“读取全部，修改本人”，所以只有 _openid 匹配的文档才能被删除
+                collection.doc(id).remove().then(() => {
+                    loadEntries();
+                }).catch(err => {
+                    console.error('删除失败:', err);
+                    alert('删除失败，可能您没有权限');
+                });
+            }
+
+            // ============================================================
+            // 4. 绑定UI事件
+            // ============================================================
+            saveBtn.addEventListener('click', addEntry);
+            ideaInput.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    addEntry();
+                }
+            });
+
+            // 如果云开发已经准备就绪，也可以手动刷新
+            // 暴露 reload 到控制台方便调试
+            window.reloadEntries = loadEntries;
+
+        })();
+    </script>
 </body>
 </html>
